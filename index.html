@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+
+body{
+    background:black;
+    color:#0f0;
+    font-family:monospace;
+    text-align:center;
+    margin:0;
+    padding:20px;
+}
+
+.one{
+    color:red;
+}
+
+#matrixBtn{
+    background:black;
+    color:#0f0;
+    border:2px solid #0f0;
+    padding:15px 30px;
+    font-size:20px;
+    cursor:pointer;
+    box-shadow:
+    0 0 10px #0f0,
+    0 0 20px #0f0;
+    transition:.3s;
+    margin-bottom:20px;
+}
+
+#matrixBtn:hover{
+    box-shadow:
+    0 0 20px #0f0,
+    0 0 40px #0f0;
+}
+
+#matrixContainer{
+    background:#000;
+    color:#0f0;
+    font-family:monospace;
+    white-space:pre-wrap;
+    display:none;
+    padding:15px;
+    height:90vh;
+    width:95%;
+    max-width:900px;
+    overflow:auto;
+    box-sizing:border-box;
+    border:1px solid #0f0;
+    margin:auto;
+    text-align:left;
+}
+
+.choiceBtn{
+    background:black;
+    color:#0f0;
+    border:2px solid #0f0;
+    padding:12px 25px;
+    margin:10px;
+    font-family:monospace;
+    cursor:pointer;
+    box-shadow:0 0 10px #0f0;
+    font-size:18px;
+}
+
+.choiceBtn:hover{
+    box-shadow:
+    0 0 20px #0f0,
+    0 0 40px #0f0;
+}
+
+@keyframes glow{
+    from{
+        transform:scale(1);
+        opacity:.8;
+    }
+    to{
+        transform:scale(1.05);
+        opacity:1;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<p>
+WANNA GET <span class="one">HACKED</span>?<br>
+TRY CLICKING THE BELOW BUTTON
+</p>
+
+<button id="matrixBtn">
+Run Matrix Protocol
+</button>
+
+<div id="matrixContainer"></div>
+
+<script>
+
+const container=
+document.getElementById(
+"matrixContainer"
+);
+
+const btn=
+document.getElementById(
+"matrixBtn"
+);
+
+const CHARS=
+"01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*";
+
+function color(
+text,
+col
+){
+    return `
+    <span style="color:${col}">
+    ${text}
+    </span>
+    `;
+}
+
+function sleep(ms){
+    return new Promise(
+    r=>setTimeout(
+    r,
+    ms
+    )
+    );
+}
+
+function scrollDown(){
+    container.scrollTop=
+    container.scrollHeight;
+}
+
+async function typing(
+text,
+delay=30,
+col="#0f0"
+){
+
+    let line=
+    document.createElement(
+    "div"
+    );
+
+    line.style.color=
+    col;
+
+    line.style.whiteSpace=
+    "pre-wrap";
+
+    container.appendChild(
+    line
+    );
+
+    for(
+    let char
+    of text
+    ){
+
+        line.innerHTML+=
+        char;
+
+        scrollDown();
+
+        await sleep(
+        delay
+        );
+    }
+
+    container.innerHTML+="<br>";
+}
+
+async function matrixRain(
+lines=60,
+speed=30
+){
+
+    const width=
+    Math.min(
+    Math.floor(
+    window.innerWidth/10
+    ),
+    100
+    );
+
+    for(
+    let i=0;
+    i<lines;
+    i++
+    ){
+
+        let line="";
+
+        for(
+        let j=0;
+        j<width;
+        j++
+        ){
+
+            line+=
+            CHARS[
+            Math.floor(
+            Math.random()*
+            CHARS.length
+            )
+            ];
+        }
+
+        container.innerHTML+=
+        color(
+        line,
+        Math.random()>.5
+        ? "#0f0"
+        : "#0a0"
+        )+
+        "<br>";
+
+        scrollDown();
+
+        await sleep(
+        speed
+        );
+    }
+}
+
+async function progressBar(
+label,
+steps=20,
+delay=80
+){
+
+    await typing(
+    label,
+    25,
+    "#0f0"
+    );
+
+    let barLine=
+    document.createElement(
+    "div"
+    );
+
+    barLine.style.margin=
+    "10px 0";
+
+    container.appendChild(
+    barLine
+    );
+
+    for(
+    let i=0;
+    i<=steps;
+    i++
+    ){
+
+        const bar=
+        "█".repeat(i)+
+        "░".repeat(
+        steps-i
+        );
+
+        const percent=
+        i*5;
+
+        barLine.innerHTML=
+        `<span style="color:cyan">[</span>`+
+        `<span style="color:#0f0">${bar}</span>`+
+        `<span style="color:cyan">]</span>`+
+        ` ${percent}%`;
+
+        scrollDown();
+
+        await sleep(
+        delay
+        );
+    }
+
+    container.innerHTML+="<br>";
+}
+
+async function runMatrix(){
+
+    btn.style.display=
+    "none";
+
+    container.style.display=
+    "block";
+
+    container.innerHTML=
+    "";
+
+    await typing(
+    "MATRIX PROTOCOL",
+    50,
+    "#0f0"
+    );
+
+    await sleep(
+    500
+    );
+
+    await matrixRain(
+    60,
+    30
+    );
+
+    await progressBar(
+    "Connecting..."
+    );
+
+    await progressBar(
+    "Decrypting..."
+    );
+
+    await progressBar(
+    "Bypassing firewall..."
+    );
+
+    await progressBar(
+    "Full system hacked..."
+    );
+
+    await typing(
+    "SYSTEM COMPROMISED",
+    40,
+    "red"
+    );
+
+    await sleep(
+    1200
+    );
+
+    container.innerHTML+=
+    color(
+    "JUST PRANKING 😎<br>SIS TRY RATING THIS OUT OF 10",
+    "yellow"
+    )+
+    "<br><br>";
+
+    container.innerHTML+=
+    `
+    <button
+    id="eidBtn"
+    class="choiceBtn">
+    ▶ ACCESS SECRET MESSAGE
+    </button>
+    `;
+
+    scrollDown();
+
+    document
+    .getElementById(
+    "eidBtn"
+    )
+    .onclick=
+    async function(){
+
+        this.style.display=
+        "none";
+
+        let eidLine=
+        document.createElement(
+        "div"
+        );
+
+        eidLine.style.color=
+        "#00ff00";
+        eidLine.style.fontSize=
+        "45px";
+        eidLine.style.fontWeight=
+        "bold";
+        eidLine.style.textAlign=
+        "center";
+        eidLine.style.marginTop=
+        "25px";
+        eidLine.style.textShadow=
+        `
+        0 0 5px #00ff00,
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 40px #00ff00
+        `;
+        eidLine.style.animation=
+        "glow 1s infinite alternate";
+
+        container.appendChild(
+        eidLine
+        );
+
+        const eidText=
+        "EID MUBARAK SHAHADA SIS";
+
+        for(
+        let char
+        of eidText
+        ){
+
+            eidLine.innerHTML+=
+            char;
+
+            scrollDown();
+
+            await sleep(
+            60
+            );
+        }
+
+        container.innerHTML+=
+        "<br><br>";
+
+        await typing(
+        "• Sis so sorry for ignoring you",
+        40,
+        "#00ff00"
+        );
+
+        container.innerHTML+=
+        `
+        <br>
+
+        <button
+        id="okBtn"
+        class="choiceBtn">
+        It's ok
+        </button>
+
+        <button
+        id="forgiveBtn"
+        class="choiceBtn">
+        I won't forgive
+        </button>
+        `;
+
+        scrollDown();
+
+        document
+        .getElementById(
+        "okBtn"
+        )
+        .onclick=
+        async function(){
+
+            this.style.display=
+            "none";
+
+            document
+            .getElementById(
+            "forgiveBtn"
+            )
+            .style.display=
+            "none";
+
+            await typing(
+            "I know you will say it's ok because of your kind heart 💚",
+            40,
+            "#00ff00"
+            );
+        };
+
+        document
+        .getElementById(
+        "forgiveBtn"
+        )
+        .onclick=
+        async function(){
+
+            this.style.display=
+            "none";
+
+            document
+            .getElementById(
+            "okBtn"
+            )
+            .style.display=
+            "none";
+
+            await typing(
+            "Please forgive, forgiving ones are the greatest 💚",
+            40,
+            "#00ff00"
+            );
+        };
+
+    };
+}
+
+btn.onclick=
+runMatrix;
+
+</script>
+
+</body>
+</html>
