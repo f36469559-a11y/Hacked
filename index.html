@@ -1,728 +1,291 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-<meta charset="UTF-8">  
-<title>SYSTEM BREACH v12 - QUANTUM</title>  
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">  
-<style>  
-:root{--green:#0f0;--red:#f00;--cyan:#0ff;--gold:#ff0;--purple:#f0f;}  
-body{  
-    background:#000; color:var(--green); font-family:'Courier New',monospace;  
-    text-align:center; margin:0; padding:20px; overflow:hidden; cursor:crosshair;  
-    filter:contrast(1.4) brightness(1.2) saturate(1.3);  
-}  
-.crt{  
-    position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:35;  
-    background:radial-gradient(ellipse at center, transparent 15%, rgba(0,0,0,0.6) 100%);  
-    box-shadow:inset 0 0 200px rgba(0,255,0,0.2);  
-    animation:crtFlicker 0.1s infinite;  
-}  
-@keyframes crtFlicker{0%,100%{opacity:1;}50%{opacity:0.93;}}  
-#shaderBg{position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;}  
-#camWrapper{  
-    position:fixed; top:20px; left:20px; width:150px; height:112px;  
-    z-index:5; border:4px solid var(--red); box-shadow:0 0 40px var(--red), 0 0 80px var(--red);  
-    display:none; background:#000; border-radius:10px; filter:grayscale(0);  
-    transition:filter 0.5s;  
-}  
-video#camFeed{width:100%; height:100%; object-fit:cover; transform:scaleX(-1);}  
-#recDot{  
-    position:absolute; top:7px; left:7px; width:14px; height:14px;  
-    background:var(--red); border-radius:50%; animation:blink 0.6s infinite;  
-    box-shadow:0 0 20px var(--red);  
-}  
-#recTime{  
-    position:absolute; top:4px; right:7px; font-size:12px; color:var(--red);  
-    font-weight:bold; text-shadow:0 0 10px var(--red);  
-}  
-@keyframes blink{0%,35%{opacity:1;}36%,100%{opacity:0;}}  
-#camClose, #thermalToggle{  
-    position:absolute; top:-16px; width:28px; height:28px;  
-    background:var(--red); color:#000; border:none; border-radius:50%;  
-    font-size:20px; line-height:28px; cursor:pointer; font-weight:bold; z-index:6;  
-}  
-#camClose{right:-16px;}  
-#thermalToggle{left:-16px; font-size:14px; background:#0ff;}  
-body::after{  
-    content:""; position:fixed; top:0; left:0; width:100%; height:100%;  
-    background:repeating-linear-gradient(transparent, transparent 2px, rgba(0,255,0,0.12) 3px);  
-    pointer-events:none; z-index:1; animation:scanline 1s linear infinite;  
-}  
-@keyframes scanline{0%{transform:translateY(0);}100%{transform:translateY(100vh);}}  
-.content{position:relative; z-index:2; animation:flicker 0.04s infinite;}  
-@keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.82;}}  
-.glitch{animation:glitchAnim 0.25s; filter:hue-rotate(180deg) saturate(4) brightness(1.8);}  
-@keyframes glitchAnim{  
-    0%{transform:translate(0) skew(0deg);}20%{transform:translate(-15px,8px) skew(-5deg);}  
-    40%{transform:translate(15px,-8px) skew(5deg);}60%{transform:translate(-8px,-15px) skew(-4deg);}  
-    80%{transform:translate(8px,15px) skew(4deg);}100%{transform:translate(0) skew(0deg);}  
-}  
-.chromatic{animation:chromaticAberration 0.3s;}  
-@keyframes chromaticAberration{  
-    0%{text-shadow:5px 0 var(--red), -5px 0 var(--cyan), 0 0 var(--green);}  
-    50%{text-shadow:-5px 0 var(--red), 5px 0 var(--cyan), 0 0 var(--green);}  
-    100%{text-shadow:0 0 var(--green);}  
-}  
-.flash{animation:flashRed 0.4s;}  
-@keyframes flashRed{0%,100%{background:#000;}50%{background:rgba(255,0,0,0.8);}}  
-.shake{animation:shake 0.3s;}  
-@keyframes shake{0%,100%{transform:translate(0);}20%{transform:translate(-12px,12px);}40%{transform:translate(12px,-12px);}60%{transform:translate(-12px,-12px);}80%{transform:translate(12px,12px);}}  
-.one{color:var(--red); text-shadow:0 0 25px var(--red), 0 0 50px var(--red);}  
-#matrixBtn{  
-    background:#000; color:var(--green); border:5px solid var(--green); padding:22px 44px;  
-    font-size:26px; cursor:pointer; box-shadow:0 0 30px var(--green), inset 0 0 25px rgba(0,255,0,0.5);  
-    transition:all 0.3s; font-weight:bold; letter-spacing:4px; text-transform:uppercase;  
-}  
-#matrixBtn:hover{box-shadow:0 0 60px var(--green), inset 0 0 50px rgba(0,255,0,0.7); transform:scale(1.12);}  
-#matrixContainer{  
-    background:rgba(2,2,2,0.99); color:var(--green); font-family:'Courier New',monospace;  
-    white-space:pre-wrap; display:none; padding:15px 15px 200px 15px;  
-    height:calc(100dvh - 60px); width:95%; max-width:1200px; overflow:auto; box-sizing:border-box;  
-    border:5px solid var(--green); margin:auto; text-align:left;  
-    box-shadow:0 0 200px rgba(0,255,0,1), inset 0 0 100px rgba(0,255,0,0.3);  
-    border-radius:15px;  
-}  
-.window-bar{  
-    background:linear-gradient(90deg, #050505, #222, #050505);  
-    padding:12px 16px; border-bottom:4px solid var(--green);  
-    display:flex; justify-content:space-between; align-items:center; font-size:15px;  
-    font-weight:bold;  
-}  
-.window-btns{display:flex; gap:12px;}  
-.win-btn{width:18px; height:18px; border-radius:50%; cursor:pointer; box-shadow:0 0 10px currentColor;}  
-.win-close{background:var(--red);}.win-min{background:#ff0;}.win-max{background:var(--green);}  
-.choiceBtn{  
-    background:#000; color:var(--green); border:5px solid var(--green); padding:20px 40px;  
-    margin:18px; font-family:'Courier New',monospace; cursor:pointer;  
-    box-shadow:0 0 30px var(--green); font-size:24px; transition:all 0.3s;  
-    font-weight:bold;  
-}  
-.choiceBtn:hover{box-shadow:0 0 60px var(--green); transform:scale(1.12);}  
-@keyframes glow{from{transform:scale(1); opacity:.8; text-shadow:0 0 25px var(--green);}to{transform:scale(1.15); opacity:1; text-shadow:0 0 60px var(--green);}}  
-.packet{position:fixed; color:var(--cyan); font-size:12px; pointer-events:none; z-index:3; animation:fly 2.5s linear;}  
-@keyframes fly{from{transform:translateX(-100px) rotate(0deg); opacity:1;}to{transform:translateX(100vw) rotate(1440deg); opacity:0;}}  
-.ascii{color:var(--red); font-size:3px; line-height:1; text-align:center; margin:40px 0; text-shadow:0 0 25px var(--red);}  
-.node{position:absolute; width:8px; height:8px; background:var(--green); border-radius:50%; box-shadow:0 0 35px var(--green);}  
-.error-popup{  
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-5deg);  
-    background:linear-gradient(135deg, #600, #c00); border:6px solid var(--red);  
-    padding:40px; color:var(--red); z-index:15; display:none;  
-    box-shadow:0 0 100px var(--red), inset 0 0 60px rgba(255,0,0,0.6);  
-    font-size:24px; font-weight:bold; animation:shake 0.3s;  
-    text-shadow:0 0 20px var(--red);  
-}  
-.process-list{color:#0a0; font-size:14px; margin:10px 0; text-shadow:0 0 10px #0a0;}  
-.key-fly{position:fixed; color:var(--cyan); font-size:18px; pointer-events:none; z-index:12; animation:keyFloat 2s linear;}  
-@keyframes keyFloat{from{transform:translateY(0) rotate(0deg); opacity:1;}to{transform:translateY(-100vh) rotate(1080deg); opacity:0;}}  
-.particle{position:fixed; width:6px; height:6px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:11; animation:explode 2.5s ease-out;}  
-@keyframes explode{from{transform:translate(0,0) scale(1); opacity:1;}to{transform:translate(var(--x),var(--y)) scale(0); opacity:0;}}  
-.boot-screen{position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:30; display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--green); font-size:20px;}  
-.mouse-trail{position:fixed; width:10px; height:10px; background:var(--cyan); border-radius:50%; pointer-events:none; z-index:4; box-shadow:0 0 20px var(--cyan);}  
-.bsod{position:fixed; top:0; left:0; width:100%; height:100%; background:#00a; z-index:40; display:none; flex-direction:column; justify-content:center; align-items:center; color:#fff; font-size:22px; padding:40px;}  
-.input-line{display:flex; align-items:center; margin-top:10px;}  
-.prompt{color:var(--cyan); margin-right:8px;}  
-#cmdInput{  
-    background:transparent; border:none; color:var(--green); font-family:'Courier New',monospace;  
-    font-size:15px; outline:none; flex:1;  
-}  
-.nuke-timer{position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:80px; color:var(--red); z-index:50; display:none; text-shadow:0 0 30px var(--red); animation:shake 0.2s infinite;}  
-.fingerprint{  
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);  
-    width:200px; height:200px; border:3px solid var(--cyan);  
-    border-radius:50%; z-index:20; display:none;  
-    background:radial-gradient(circle, transparent 40%, rgba(0,255,255,0.1) 70%);  
-    box-shadow:0 0 50px var(--cyan), inset 0 0 50px rgba(0,255,255,0.2);  
-    animation:pulse 1s infinite;  
-}  
-@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.1);}}  
-.bit{  
-    position:fixed; color:var(--gold); font-size:20px; font-weight:bold;  
-    pointer-events:auto; z-index:45; cursor:pointer;  
-    animation:fall linear;  
-}  
-@keyframes fall{from{top:-50px;}to{top:100vh;}}  
-.graph{width:100%; height:60px; background:rgba(0,255,0,0.1); margin:10px 0; position:relative; overflow:hidden;}  
-.graph-line{position:absolute; bottom:0; left:0; height:2px; background:var(--green); box-shadow:0 0 10px var(--green);}  
-</style>  
-</head>  
-<body>  
-<div class="crt"></div>  
-<div class="boot-screen" id="bootScreen"></div>  
-<canvas id="shaderBg"></canvas>  
-<div class="fingerprint" id="fingerprint"></div>  
-<div class="nuke-timer" id="nukeTimer">10</div>  
-<div id="camWrapper">  
-    <div id="recDot"></div>  
-    <div id="recTime">00:00</div>  
-    <video id="camFeed" autoplay playsinline></video>  
-    <button id="camClose">X</button>  
-    <button id="thermalToggle">T</button>  
-</div>  
-<div class="content">  
-<p>WANNA GET <span class="one">HACKED</span>?<br>TRY CLICKING THE BELOW BUTTON</p>  
-<button id="matrixBtn">▶ INITIATE QUANTUM PROTOCOL</button>  
-<div id="matrixContainer"></div>  
-</div>  
-<div class="error-popup" id="errorPopup">⚠ CRITICAL SYSTEM FAILURE ⚠<br>UNAUTHORIZED ACCESS DETECTED<br><small>Press ANY KEY to continue...</small></div>  
-<div class="bsod" id="bsod">  
-    <div style="font-size:56px; margin-bottom:40px;">:(</div>  
-    <div>Your PC ran into a problem and needs to restart.</div>  
-    <div>We're just collecting some info, and then we'll restart for you.</div>  
-    <div style="margin-top:30px;">0% complete</div>  
-</div>  <script>  
-// WebGL Shader Background  
-const shaderCanvas = document.getElementById('shaderBg');  
-const gl = shaderCanvas.getContext('webgl');  
-shaderCanvas.width = window.innerWidth;  
-shaderCanvas.height = window.innerHeight;  
-  
-const vertShaderSrc = `  
-attribute vec2 position;  
-varying vec2 vUv;  
-void main() {  
-    vUv = position * 0.5 + 0.5;  
-    gl_Position = vec4(position, 0.0, 1.0);  
-}`;  
-const fragShaderSrc = `  
-precision highp float;  
-varying vec2 vUv;  
-uniform float time;  
-float noise(vec2 p) {  
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);  
-}  
-void main() {  
-    vec2 uv = vUv;  
-    uv.x += sin(uv.y * 10.0 + time) * 0.1;  
-    uv.y += cos(uv.x * 10.0 + time) * 0.1;  
-    float n = noise(uv * 20.0 + time * 0.5);  
-    vec3 color = vec3(0.0, n * 0.8, n * 0.3);  
-    float vignette = 1.0 - length(uv - 0.5) * 1.5;  
-    gl_FragColor = vec4(color * vignette, 1.0);  
-}`;  
-  
-function createShader(gl, type, src) {  
-    const s = gl.createShader(type);  
-    gl.shaderSource(s, src);  
-    gl.compileShader(s);  
-    return s;  
-}  
-const prog = gl.createProgram();  
-gl.attachShader(prog, createShader(gl, gl.VERTEX_SHADER, vertShaderSrc));  
-gl.attachShader(prog, createShader(gl, gl.FRAGMENT_SHADER, fragShaderSrc));  
-gl.linkProgram(prog);  
-gl.useProgram(prog);  
-  
-const posBuffer = gl.createBuffer();  
-gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);  
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);  
-const posLoc = gl.getAttribLocation(prog, 'position');  
-gl.enableVertexAttribArray(posLoc);  
-gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);  
-const timeLoc = gl.getUniformLocation(prog, 'time');  
-  
-function renderShader(time) {  
-    gl.uniform1f(timeLoc, time * 0.001);  
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);  
-    requestAnimationFrame(renderShader);  
-}  
-renderShader(0);  
-  
-const synth = window.speechSynthesis;  
-const voices = [];  
-synth.onvoiceschanged = ()=>voices.push(...synth.getVoices());  
-function speak(text, voiceIdx=0){  
-    if(synth){  
-        const utter = new SpeechSynthesisUtterance(text);  
-        utter.rate = 1.4; utter.pitch = 0.6 + voiceIdx*0.3; utter.volume = 0.9;  
-        if(voices[voiceIdx]) utter.voice = voices[voiceIdx];  
-        synth.speak(utter);  
-    }  
-}  
-  
-const camVideo = document.getElementById("camFeed");  
-const camWrapper = document.getElementById("camWrapper");  
-const camClose = document.getElementById("camClose");  
-const thermalToggle = document.getElementById("thermalToggle");  
-const recTime = document.getElementById("recTime");  
-const bootScreen = document.getElementById("bootScreen");  
-const bsod = document.getElementById("bsod");  
-const fingerprint = document.getElementById("fingerprint");  
-const nukeTimer = document.getElementById("nukeTimer");  
-  
-const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";  
-function spawnPacket(){  
-    const p = document.createElement("div");  
-    p.className = "packet";  
-    p.textContent = `[PKT:${Math.random().toString(16).substr(2,24).toUpperCase()}]`;  
-    p.style.top = Math.random()*window.innerHeight + "px";  
-    document.body.appendChild(p);  
-    setTimeout(()=>p.remove(), 2500);  
-}  
-setInterval(spawnPacket, 50);  
-  
-function spawnKey(){  
-    const keys = 'ASDFJKLQWERTYZXCV1234567890!@#$%^&*'.split('');  
-    const k = document.createElement("div");  
-    k.className = "key-fly";  
-    k.textContent = keys[Math.floor(Math.random()*keys.length)];  
-    k.style.left = Math.random()*window.innerWidth + "px";  
-    k.style.bottom = "0px";  
-    document.body.appendChild(k);  
-    setTimeout(()=>k.remove(), 2000);  
-}  
-setInterval(spawnKey, 150);  
-  
-const container = document.getElementById("matrixContainer");  
-const btn = document.getElementById("matrixBtn");  
-const errorPopup = document.getElementById("errorPopup");  
-const CHARS = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*+=<>?/|\\~`^";  
-const bgMusic = new Audio("funk_abnormal.mp3");  
-bgMusic.loop = true; bgMusic.volume = 0.06;  
-  
-function color(text, col){return `<span style="color:${col}">${text}</span>`;}  
-function sleep(ms){return new Promise(r=>setTimeout(r, ms));}  
-function scrollDown(){container.scrollTop = container.scrollHeight;}  
-  
-async function typing(text, delay=1, col="#0f0", voice=false, voiceIdx=0){  
-    let line = document.createElement("div");  
-    line.style.color = col; line.style.whiteSpace = "pre-wrap";  
-    container.appendChild(line);  
-    for(let char of text){  
-        line.textContent += char;  
-        scrollDown(); await sleep(delay);  
-    }  
-    container.innerHTML += "<br>";  
-    if(voice) speak(text, voiceIdx);  
-}  
-  
-async function matrixRain(lines=150, speed=3){  
-    const width = Math.min(Math.floor(window.innerWidth/6), 300);  
-    for(let i=0; i<lines; i++){  
-        let line = "";  
-        for(let j=0; j<width; j++){  
-            line += CHARS[Math.floor(Math.random()*CHARS.length)];  
-        }  
-        container.innerHTML += color(line, Math.random()>.5? "#0f0" : "#0a0") + "<br>";  
-        scrollDown(); await sleep(speed);  
-    }  
-}  
-  
-async function progressBar(label, steps=24, delay=15){  
-    await typing(label, 3, "#0f0");  
-    let barLine = document.createElement("div");  
-    barLine.style.margin = "8px 0";  
-    container.appendChild(barLine);  
-    for(let i=0; i<=steps; i++){  
-        const bar = "█".repeat(i) + "░".repeat(steps-i);  
-        const percent = Math.floor(i*100/steps);  
-        barLine.innerHTML = `<span style="color:cyan">[</span><span style="color:#0f0">${bar}</span><span style="color:cyan">]</span> ${percent}%`;  
-        scrollDown(); await sleep(delay + Math.random()*5);  
-    }  
-    container.innerHTML += "<br>";  
-}  
-  
-async function drawGraph(){  
-    const graph = document.createElement('div');  
-    graph.className = 'graph';  
-    container.appendChild(graph);  
-    const line = document.createElement('div');  
-    line.className = 'graph-line';  
-    graph.appendChild(line);  
-    let width = 0;  
-    const interval = setInterval(()=>{  
-        width += 2;  
-        line.style.width = width + '%';  
-        if(width >= 100) clearInterval(interval);  
-    }, 50);  
-    await sleep(1500);  
-}  
-  
-async function showProcesses(){  
-    const procs = ["svchost.exe", "lsass.exe", "explorer.exe", "winlogon.exe", "chrome.exe", "discord.exe", "spotify.exe", "code.exe", "quantum.exe"];  
-    container.innerHTML += color("[PROCESS SCAN INITIATED]", "#0ff") + "<br>";  
-    for(let i=0; i<30; i++){  
-        const proc = procs[Math.floor(Math.random()*procs.length)];  
-        const pid = Math.floor(Math.random()*999);  
-        container.innerHTML += `<div class="process-list">PID:${pid} | ${proc} | MEM:${Math.floor(Math.random()*2000)}MB | CPU:${Math.floor(Math.random()*100)}% | STATUS: RUNNING</div>`;  
-        scrollDown(); await sleep(20);  
-    }  
-    container.innerHTML += "<br>";  
-}  
-  
-function randomIP(){return `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;}  
-  
-// Mouse trail  
-document.addEventListener('mousemove', (e)=>{  
-    const trail = document.createElement('div');  
-    trail.className = 'mouse-trail';  
-    trail.style.left = e.clientX + 'px';  
-    trail.style.top = e.clientY + 'px';  
-    document.body.appendChild(trail);  
-    setTimeout(()=>trail.remove(), 600);  
-});  
-  
-// Particle explosion  
-function explodeParticles(x, y, count=100){  
-    for(let i=0; i<count; i++){  
-        const p = document.createElement("div");  
-        p.className = "particle";  
-        p.style.left = x + "px";  
-        p.style.top = y + "px";  
-        const angle = (Math.PI * 2 * i) / count;  
-        const dist = 200 + Math.random() * 400;  
-        p.style.setProperty('--x', Math.cos(angle) * dist + 'px');  
-        p.style.setProperty('--y', Math.sin(angle) * dist + 'px');  
-        document.body.appendChild(p);  
-        setTimeout(()=>p.remove(), 2500);  
-    }  
-}  
-  
-const skull = `  
-    ██████╗ █████╗ ███╗ ██╗███████╗  
-    ██╔════╝ ██╔══██╗████╗ ██║██╔════╝  
-    ██║ ███████║██╔██╗ ██║███████╗  
-    ██║ ██╔══██║██║╚██╗██║╚════██║  
-    ╚██████╗ ██║ ██║██║ ╚████║███████║  
-     ╚═════╝ ╚═╝ ╚═╝╚═╝ ╚═══╝╚══════╝  
-`;  
-  
-async function fakeDownload(){  
-    const files = ["passwords.db", "emails.dat", "photos.zip", "banking.csv", "nuclear_codes.txt", "vpn_keys.pem", "discord_tokens.json", "bitcoin_wallet.dat"];  
-    for(let f of files){  
-        await typing(`Downloading ${f}...`, 4, "#0ff");  
-        await progressBar("", 20, 20);  
-        if(Math.random() > 0.3){  
-            errorPopup.style.display = "block";  
-            await sleep(800);  
-            errorPopup.style.display = "none";  
-            await typing("[BYPASS] Antivirus signature evaded", 5, "#0ff");  
-        }  
-    }  
-}  
-  
-let recSeconds = 0;  
-let recInterval;  
-function startRecTimer(){  
-    recSeconds = 0;  
-    recInterval = setInterval(()=>{  
-        recSeconds++;  
-        const mins = String(Math.floor(recSeconds/60)).padStart(2,'0');  
-        const secs = String(recSeconds%60).padStart(2,'0');  
-        recTime.textContent = `${mins}:${secs}`;  
-    }, 1000);  
-}  
-function stopRecTimer(){clearInterval(recInterval);}  
-  
-let thermalMode = false;  
-thermalToggle.onclick = ()=>{  
-    thermalMode =!thermalMode;  
-    camWrapper.style.filter = thermalMode? 'grayscale(1) hue-rotate(180deg) brightness(1.5)' : 'grayscale(0)';  
-};  
-  
-async function initCamera(){  
-    try{  
-        const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});  
-        camVideo.srcObject = stream;  
-        camWrapper.style.display = "block";  
-        startRecTimer();  
-        bgMusic.currentTime = 0;  
-        bgMusic.play().catch(()=>{});  
-        await typing("[OK] Camera access: GRANTED", 3, "#0ff", true, 0);  
-    }catch(e){  
-        await typing("[!] Camera access: DENIED - Thermal scan active", 3, "#ff0");  
-    }  
-}  
-  
-camClose.onclick = ()=>{  
-    if(camVideo.srcObject){  
-        camVideo.srcObject.getTracks().forEach(track => track.stop());  
-    }  
-    stopRecTimer();  
-    camWrapper.style.display = "none";  
-};  
-  
-async function bootSequence(){  
-    const bootLines = [  
-        "QUANTUM BIOS v14.0.0 (c) 2024-2026 CyberCore Systems",  
-        "Memory Test: 131072MB OK",  
-        "CPU: AMD Quantum Threadripper 9999X @ 12.9GHz",  
-        "GPU: NVIDIA RTX 99999 Ti Quantum Edition",  
-        "Initializing Neural Net... 100%",  
-        "Loading Quantum Kernel v12.7...",  
-        "Boot device: Quantum NVMe SSD Array",  
-        "Press F12 to enter setup"  
-    ];  
-    for(let line of bootLines){  
-        bootScreen.innerHTML += line + "<br>";  
-        await sleep(120);  
-    }  
-    await sleep(500);  
-    bootScreen.style.display = "none";  
-}  
-  
-function drawNetwork(){  
-    for(let i=0; i<50; i++){  
-        const node = document.createElement("div");  
-        node.className = "node";  
-        node.style.left = Math.random()*window.innerWidth + "px";  
-        node.style.top = Math.random()*window.innerHeight + "px";  
-        document.body.appendChild(node);  
-        setTimeout(()=>node.remove(), 7000);  
-    }  
-}  
-  
-// Fake BSOD  
-async function showBSOD(){  
-    bsod.style.display = "flex";  
-    for(let i=0; i<=100; i+=5){  
-        bsod.children[3].textContent = i + "% complete";  
-        await sleep(200);  
-    }  
-    await sleep(800);  
-    bsod.style.display = "none";  
-}  
-  
-// AI Assistant  
-async function aiChat(msg, voice=1){  
-    await typing(`[AI ASSISTANT] ${msg}`, 6, "#f0f", true, voice);  
-}  
-  
-// Nuke countdown  
-async function nukeCountdown(){  
-    nukeTimer.style.display = "block";  
-    for(let i=10; i>0; i--){  
-        nukeTimer.textContent = i;  
-        await sleep(300);  
-    }  
-    nukeTimer.style.display = "none";  
-}  
-  
-// Quantum bit catching mini-game  
-async function quantumGame(){  
-    await typing("[MINI-GAME] Catch 5 quantum bits to decrypt", 8, "#ff0");  
-    let caught = 0;  
-    const gameInterval = setInterval(()=>{  
-        if(caught >= 5){  
-            clearInterval(gameInterval);  
-            return;  
-        }  
-        const bit = document.createElement('div');  
-        bit.className = 'bit';  
-        bit.textContent = Math.random() > 0.5? '1' : '0';  
-        bit.style.left = Math.random()*(window.innerWidth-50) + 'px';  
-        bit.style.animationDuration = (3+Math.random()*2) + 's';  
-        bit.onclick = ()=>{  
-            caught++;  
-            bit.remove();  
-            if(caught >= 5) clearInterval(gameInterval);  
-        };  
-        document.body.appendChild(bit);  
-        setTimeout(()=>bit.remove(), 5000);  
-    }, 800);  
-    while(caught < 5) await sleep(100);  
-    await typing("[SUCCESS] Quantum decryption complete", 8, "#0f0");  
-}  
-  
-// Command system  
-function setupCommandInput(){  
-    const inputLine = document.createElement('div');  
-    inputLine.className = 'input-line';  
-    inputLine.innerHTML = '<span class="prompt">root@quantum:~#</span><input type="text" id="cmdInput" autocomplete="off">';  
-    container.appendChild(inputLine);  
-    const input = document.getElementById('cmdInput');  
-    input.focus();  
-    input.onkeydown = async (e)=>{  
-        if(e.key === 'Enter'){  
-            const cmd = input.value.toLowerCase();  
-            input.value = '';  
-            if(cmd === 'help'){  
-                await typing("Available commands: help, scan, nuke, clear, exit, prank, ai", 8, "#0ff");  
-            }else if(cmd === 'scan'){  
-                await typing("[VIRUS SCAN] Scanning quantum filesystem...", 8, "#ff0");  
-                await progressBar("", 25, 18);  
-                await typing("[THREAT] 9999 malware detected and quantum deleted", 8, "#f00");  
-            }else if(cmd === 'nuke'){  
-                await typing("Are you sure? Type 'yes' to confirm", 8, "#f00");  
-            }else if(cmd === 'clear'){  
-                container.innerHTML = '';  
-            }else if(cmd === 'prank'){  
-                await typing("Nice try 😏", 8, "#ff0");  
-            }else if(cmd === 'ai'){  
-                await aiChat("I am watching you...", 2);  
-            }else if(cmd === 'exit'){  
-                await typing("Session terminated.", 8, "#0ff");  
-            }else{  
-                await typing(`Command not found: ${cmd}`, 8, "#f00");  
-            }  
-            scrollDown();  
-        }  
-    };  
-}  
-  
-let themeIdx = 0;  
-const themes = ['#0f0', '#f00', '#ff0', '#f0f', '#0ff'];  
-function cycleTheme(){  
-    themeIdx = (themeIdx + 1) % themes.length;  
-    document.body.style.setProperty('--green', themes[themeIdx]);  
-}  
-  
-async function runMatrix(){  
-    bgMusic.play().catch(()=>{});  
-    btn.style.display = "none";  
-    container.style.display = "block";  
-    container.innerHTML = `  
-        <div class="window-bar">  
-            <span>QUANTUM_CONSOLE.EXE - Administrator - Build 99999</span>  
-            <div class="window-btns">  
-                <div class="win-btn win-min"></div>  
-                <div class="win-btn win-max"></div>  
-                <div class="win-btn win-close"></div>  
-            </div>  
-        </div>  
-    `;  
-  
-    await aiChat("Quantum breach initializing...", 0);  
-    await typing("[SYSTEM] Quantum Core Online v12.0.0", 6, "#0ff", true, 0);  
-    await typing("[SYSTEM] Neural Net: SYNCHRONIZED", 6, "#0ff");  
-  
-    fingerprint.style.display = "block";  
-    await typing("[PROMPT] Place finger on scanner...", 8, "#ff0");  
-    await sleep(2000);  
-    fingerprint.style.display = "none";  
-  
-    await typing("[PROMPT] Enter ADMIN password:", 8, "#ff0");  
-    await typing("Password: ********", 10, "#0ff");  
-    await typing("[CRACKING] Quantum rainbow table attack...", 8, "#ff0");  
-    await progressBar("", 16, 20);  
-    await typing("[SUCCESS] Password: hunter2", 8, "#0f0", true, 1);  
-  
-    await typing("[PROMPT] Requesting biometric scan...", 8, "#ff0");  
-    await initCamera();  
-  
-    await typing("[OK] Facial recognition: 100% MATCH", 3, "#0ff");  
-    await typing("[OK] Voice pattern: VERIFIED", 3, "#0ff");  
-    await typing(`[TARGET] IP: ${randomIP()} | LOC: 24.4539°N, 54.3773°E`, 3, "#0ff");  
-    await typing(` Open ports: 22,80,443,3389,8080,3306,5900,1337,31337,65535,9999`, 3, "#0ff");  
-    await typing(`[STATUS] Firewall: ACTIVE | IDS: ACTIVE | WAF: ACTIVE | HONEYPOT: ACTIVE`, 3, "#ff0");  
-  
-    drawNetwork();  
-    await sleep(800);  
-    await showProcesses();  
-    await drawGraph();  
-  
-    await typing("[SYSTEM] QUANTUM PROTOCOL: ENGAGED", 10, "#0f0", true, 0);  
-    await sleep(600);  
-    await matrixRain(150, 3);  
-  
-    await progressBar("Bruteforcing RSA-8192...");  
-    await progressBar("Cracking SHA-1024...");  
-    await progressBar("Escalating to ROOT...");  
-    await progressBar("Installing persistent backdoor...");  
-    await progressBar("Wiping logs...");  
-    await progressBar("Establishing C2 channel...");  
-    await progressBar("Generating encryption keys...");  
-  
-    // Fake Windows Update  
-    await typing("[UPDATE] Windows Update: Installing KB99999...", 8, "#ff0");  
-    await progressBar("", 12, 40);  
-  
-    cycleTheme();  
-    const rect = container.getBoundingClientRect();  
-    explodeParticles(rect.width/2, rect.height/2);  
-    document.body.classList.add("flash", "glitch", "chromatic", "shake");  
-    await typing("[SYSTEM] ROOT ACCESS: GRANTED", 5, "red", true, 2);  
-    await sleep(1000);  
-    document.body.classList.remove("flash", "glitch", "chromatic", "shake");  
-  
-    container.innerHTML += `<div class="ascii">${color(skull, "red")}</div>`;  
-  
-    await fakeDownload();  
-  
-    await typing("[ALERT] INTRUSION DETECTED BY SOC", 12, "red");  
-    for(let i=5; i>0; i--){  
-        await typing(`TRACE INITIATED: ${i}...`, 100, "red");  
-    }  
-  
-    await quantumGame();  
-  
-    camClose.click();  
-    await sleep(500);  
-  
-    await showBSOD();  
-    await sleep(500);  
-  
-    document.body.classList.remove("flash", "glitch", "chromatic", "shake");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>hacked</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="index, follow">
+<style>
+body{
+    background:black;
+    color:#0f0;
+    font-family:monospace;
+    text-align:center;
+    margin:0;
+    padding:20px;
+    overflow:hidden;
+}
+canvas#matrixBg{
+    position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    z-index:0; opacity:0.5;
+}
+body::after{
+    content:""; position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    background:repeating-linear-gradient(
+        transparent, transparent 2px,
+        rgba(0,255,0,0.04) 3px
+    );
+    pointer-events:none; z-index:1;
+    animation:scanline 8s linear infinite;
+}
+@keyframes scanline{
+    0%{transform:translateY(0);}
+    100%{transform:translateY(100vh);}
+}
+.content{
+    position:relative; z-index:2;
+    animation:flicker 0.15s infinite;
+}
+@keyframes flicker{
+    0%,100%{opacity:1;}
+    50%{opacity:0.97;}
+}
+.glitch{
+    animation:glitchAnim 0.3s;
+}
+@keyframes glitchAnim{
+    0%{transform:translate(0);}
+    20%{transform:translate(-2px,2px);}
+    40%{transform:translate(2px,-2px);}
+    60%{transform:translate(-2px,-2px);}
+    80%{transform:translate(2px,2px);}
+    100%{transform:translate(0);}
+}
+.flash{
+    animation:flashRed 0.5s;
+}
+@keyframes flashRed{
+    0%,100%{background:black;}
+    50%{background:rgba(255,0,0,0.2);}
+}
+.one{ color:red; }
+#matrixBtn{
+    background:black; color:#0f0;
+    border:2px solid #0f0; padding:15px 30px;
+    font-size:20px; cursor:pointer;
+    box-shadow:0 0 10px #0f0, 0 0 20px #0f0;
+    transition:box-shadow.3s; margin-bottom:20px;
+}
+#matrixBtn:hover{ box-shadow:0 0 20px #0f0, 0 0 40px #0f0; }
+#matrixContainer{
+    background:rgba(0,0,0,0.9); color:#0f0;
+    font-family:monospace; white-space:pre-wrap;
+    display:none; padding:15px; height:90vh;
+    width:95%; max-width:900px; overflow:auto;
+    box-sizing:border-box; border:1px solid #0f0;
+    margin:auto; text-align:left;
+    box-shadow:0 0 40px rgba(0,255,0,0.4);
+}
+.choiceBtn{
+    background:black; color:#0f0;
+    border:2px solid #0f0; padding:12px 25px;
+    margin:10px; font-family:monospace;
+    cursor:pointer; box-shadow:0 0 10px #0f0;
+    font-size:18px;
+}
+.choiceBtn:hover{ box-shadow:0 0 20px #0f0, 0 0 40px #0f0; }
+@keyframes glow{
+    from{transform:scale(1); opacity:.8;}
+    to{transform:scale(1.05); opacity:1;}
+}
+.packet{
+    position:fixed; color:#0ff; font-size:12px;
+    pointer-events:none; z-index:3;
+    animation:fly 3s linear;
+}
+@keyframes fly{
+    from{transform:translateX(-100px); opacity:1;}
+    to{transform:translateX(100vw); opacity:0;}
+}
+</style>
+</head>
+<body>
+<canvas id="matrixBg"></canvas>
+<div class="content">
+<p>WANNA GET <span class="one">HACKED</span>?<br>TRY CLICKING THE BELOW BUTTON</p>
+<button id="matrixBtn">Run Matrix Protocol</button>
+<div id="matrixContainer"></div>
+</div>
 
-    container.innerHTML += `<div class="ascii">${color(skull, "red")}</div>`;
+<audio id="typeSound" preload="auto">
+<source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+</audio>
+<audio id="beepSound" preload="auto">
+<source src="data:audio/wav;base64,UklGRlgGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+</audio>
 
-    await fakeDownload();
+<script>
+const canvas = document.getElementById("matrixBg");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    await typing("[ALERT] INTRUSION DETECTED BY SOC", 12, "red");
-    for(let i=5; i>0; i--){
-        await typing(`TRACE INITIATED: ${i}...`, 100, "red");
+const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+const fontSize = 14;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array(columns).fill(1);
+
+function drawMatrix(){
+    ctx.fillStyle = "rgba(0,0,0,0.04)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#0f0";
+    ctx.font = fontSize + "px monospace";
+    for(let i=0; i<drops.length; i++){
+        const text = chars[Math.floor(Math.random()*chars.length)];
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
     }
+}
+setInterval(drawMatrix, 30);
 
-    await quantumGame();
+window.addEventListener("resize", ()=>{
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+});
 
-    camClose.click();
-    await sleep(500);
+function spawnPacket(){
+    const p = document.createElement("div");
+    p.className = "packet";
+    p.textContent = `[DATA:${Math.random().toString(16).substr(2,8).toUpperCase()}]`;
+    p.style.top = Math.random()*window.innerHeight + "px";
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 3000);
+}
+setInterval(spawnPacket, 400);
 
-    await showBSOD();
-    await sleep(500);
+const container = document.getElementById("matrixContainer");
+const btn = document.getElementById("matrixBtn");
+const typeSound = document.getElementById("typeSound");
+const beepSound = document.getElementById("beepSound");
+const CHARS = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*";
+const bgMusic = new Audio("funk_abnormal.mp3");
+bgMusic.loop = true; bgMusic.volume = 0.3;
 
-    cycleTheme(); // switch to gold
-    container.innerHTML += color("JUST PRANKING 😎<br>AFEEF TRY RATING THIS OUT OF 10", "gold") + "<br><br>";
-    container.innerHTML += `<button id="eidBtn" class="choiceBtn">▶ DECRYPT SECRET MESSAGE</button>`;
-    scrollDown(); await sleep(250); scrollDown();
+function color(text, col){ return `<span style="color:${col}">${text}</span>`; }
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+function scrollDown(){ container.scrollTop = container.scrollHeight; }
+
+async function typing(text, delay=25, col="#0f0"){
+    let line = document.createElement("div");
+    line.style.color = col;
+    line.style.whiteSpace = "pre-wrap";
+    container.appendChild(line);
+    for(let char of text){
+        line.textContent += char;
+        typeSound.currentTime = 0;
+        typeSound.play().catch(()=>{});
+        scrollDown();
+        await sleep(delay);
+    }
+    container.innerHTML += "<br>";
+}
+
+async function matrixRain(lines=50, speed=20){
+    const width = Math.min(Math.floor(window.innerWidth/10), 120);
+    for(let i=0; i<lines; i++){
+        let line = "";
+        for(let j=0; j<width; j++){
+            line += CHARS[Math.floor(Math.random()*CHARS.length)];
+        }
+        container.innerHTML += color(line, Math.random()>.5? "#0f0" : "#0a0") + "<br>";
+        scrollDown();
+        await sleep(speed);
+    }
+}
+
+async function progressBar(label, steps=25, delay=60){
+    await typing(label, 20, "#0f0");
+    let barLine = document.createElement("div");
+    barLine.style.margin = "10px 0";
+    container.appendChild(barLine);
+    for(let i=0; i<=steps; i++){
+        const bar = "█".repeat(i) + "░".repeat(steps-i);
+        const percent = Math.floor(i*100/steps);
+        barLine.innerHTML = `<span style="color:cyan">[</span><span style="color:#0f0">${bar}</span><span style="color:cyan">]</span> ${percent}%`;
+        scrollDown();
+        await sleep(delay);
+    }
+    container.innerHTML += "<br>";
+}
+
+function randomIP(){
+    return `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+}
+
+async function runMatrix(){
+    bgMusic.play().catch(()=>{});
+    btn.style.display = "none";
+    container.style.display = "block";
+    container.innerHTML = "";
+
+    await typing(`[SCAN] Target acquired: ${randomIP()}`, 15, "#0ff");
+    await typing(`[PING] Response: 12ms`, 15, "#0ff");
+    await typing(`[PORT] 22,80,443 open`, 15, "#0ff");
+    await sleep(300);
+
+    await typing("MATRIX PROTOCOL INITIATED...", 35, "#0f0");
+    await sleep(400);
+    await matrixRain(50, 20);
+    await progressBar("Establishing connection...");
+    await progressBar("Bypassing encryption...");
+    await progressBar("Escalating privileges...");
+    await progressBar("Injecting payload...");
+
+    document.body.classList.add("flash", "glitch");
+    beepSound.play().catch(()=>{});
+    await typing("SYSTEM COMPROMISED", 25, "red");
+    await sleep(800);
+    document.body.classList.remove("flash", "glitch");
+
+    container.innerHTML += color("JUST PRANKING 😎<br>AFEEF TRY RATING THIS OUT OF 10", "yellow") + "<br><br>";
+    container.innerHTML += `<button id="eidBtn" class="choiceBtn">▶ ACCESS SECRET MESSAGE</button>`;
+    scrollDown();
 
     document.getElementById("eidBtn").onclick = async function(){
         this.style.display = "none";
-        cycleTheme(); // switch to purple
         let eidLine = document.createElement("div");
         eidLine.style.color = "#00ff00";
-        eidLine.style.fontSize = "56px";
+        eidLine.style.fontSize = "45px";
         eidLine.style.fontWeight = "bold";
         eidLine.style.textAlign = "center";
-        eidLine.style.marginTop = "40px";
-        eidLine.style.paddingBottom = "160px";
-        eidLine.style.textShadow = `0 0 15px #00ff00, 0 0 35px #00ff00, 0 0 70px #00ff00, 0 0 100px #00ff00`;
-        eidLine.style.animation = "glow 0.6s infinite alternate";
+        eidLine.style.marginTop = "25px";
+        eidLine.style.textShadow = `0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 40px #00ff00`;
+        eidLine.style.animation = "glow 1s infinite alternate";
         container.appendChild(eidLine);
 
         const eidText = "EID MUBARAK MY DEAR AFEEF HASSIM";
         for(let char of eidText){
             eidLine.innerHTML += char;
-            scrollDown(); await sleep(15);
+            scrollDown();
+            await sleep(50);
         }
 
         container.innerHTML += "<br><br>";
-        await typing("• Afeef, I failed to protect the trust you gave me, and I deeply regret it 💚", 8, "#00ff00", true, 0);
+        await typing("• Afeef, I failed to protect the trust you gave me, and I deeply regret it 💚", 30, "#00ff00");
 
-        setupCommandInput();
         container.innerHTML += `<br><button id="okBtn" class="choiceBtn">Trust Restored 💚</button><button id="forgiveBtn" class="choiceBtn">Not Ready Yet 🌙</button>`;
-        scrollDown(); await sleep(250); scrollDown();
+        scrollDown();
 
         document.getElementById("okBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("forgiveBtn").style.display = "none";
-            await typing("Thank you, Afeef 💚\nI'll value your trust more carefully from now on 🕊️", 8, "#00ff00", true, 0);
+            await typing("Thank you, Afeef 💚\nI'll value your trust more carefully from now on 🕊️", 30, "#00ff00");
         };
 
         document.getElementById("forgiveBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("okBtn").style.display = "none";
-            await typing("I understand 💚\nI'll respect your space and hope time brings healing 🌿", 8, "#00ff00", true, 0);
+            await typing("I understand 💚\nI'll respect your space and hope time brings healing 🌿", 30, "#00ff00");
         };
     };
 }
-
-bootSequence();
 btn.onclick = runMatrix;
-
-document.addEventListener('keydown', ()=>{
-    if(errorPopup.style.display === "block"){
-        errorPopup.style.display = "none";
-    }
-});
 </script>
 </body>
 </html>
+  
