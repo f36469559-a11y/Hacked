@@ -23,7 +23,7 @@ body{
     font-size:20px;
     cursor:pointer;
     box-shadow:0 0 10px #0f0, 0 0 20px #0f0;
-    transition:.3s;
+    transition: box-shadow .3s;
     margin-bottom:20px;
 }
 #matrixBtn:hover{
@@ -75,7 +75,6 @@ const container = document.getElementById("matrixContainer");
 const btn = document.getElementById("matrixBtn");
 const CHARS = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*";
 
-// Background music - put funk_abnormal.mp3 in same folder
 const bgMusic = new Audio("funk_abnormal.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.4;
@@ -92,7 +91,7 @@ async function typing(text, delay=30, col="#0f0"){
     line.style.whiteSpace = "pre-wrap";
     container.appendChild(line);
     for(let char of text){
-        line.innerHTML += char;
+        line.textContent += char; // safer than innerHTML
         scrollDown();
         await sleep(delay);
     }
@@ -128,8 +127,7 @@ async function progressBar(label, steps=20, delay=80){
 }
 
 async function runMatrix(){
-    // Start music on click - bypasses browser autoplay block
-    bgMusic.play().catch(()=>{});
+    bgMusic.play().catch(err => console.log("Audio failed:", err));
 
     btn.style.display = "none";
     container.style.display = "block";
@@ -178,13 +176,13 @@ async function runMatrix(){
         document.getElementById("okBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("forgiveBtn").style.display = "none";
-            await typing("Thank you, Afeef 💚 I'll value your trust more carefully from now on 🕊️", 40, "#00ff00");
+            await typing("Thank you, Afeef 💚\nI'll value your trust more carefully from now on 🕊️", 40, "#00ff00");
         };
 
         document.getElementById("forgiveBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("okBtn").style.display = "none";
-            await typing("I understand 💚 I'll respect your space and hope time brings healing 🌿", 40, "#00ff00");
+            await typing("I understand 💚\nI'll respect your space and hope time brings healing 🌿", 40, "#00ff00");
         };
     };
 }
