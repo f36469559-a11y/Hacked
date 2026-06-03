@@ -170,7 +170,7 @@ async function runMatrix(){
         }
 
         container.innerHTML += "<br><br>";
-        await typing("• Sis, sorry if I made you feel ignored at grandma's house 💚", 40, "#00ff00");
+        await typing("• Afeef, I failed to protect the trust you gave me, and I deeply regret it 💚", 40, "#00ff00");
 
         container.innerHTML += `<br><button id="okBtn" class="choiceBtn">It's ok</button><button id="forgiveBtn" class="choiceBtn">I won't forgive</button>`;
         scrollDown();
@@ -178,13 +178,15 @@ async function runMatrix(){
         document.getElementById("okBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("forgiveBtn").style.display = "none";
-            await typing("Knew my sis had a soft heart 😄💚", 40, "#00ff00");
+            await typing("Thank you, Afeef 💚
+I'll value your trust more carefully from now on 🕊️", 40, "#00ff00");
         };
 
         document.getElementById("forgiveBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("okBtn").style.display = "none";
-            await typing("Sorry sis... I hope you can forgive me 💚", 40, "#00ff00");
+            await typing("I understand 💚
+I'll respect your space and hope time brings healing 🌿", 40, "#00ff00");
         };
     };
 }
