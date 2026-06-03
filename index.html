@@ -13,6 +13,30 @@ body{
     text-align:center;
     margin:0;
     padding:20px;
+    overflow:hidden;
+}
+canvas#matrixBg{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:0;
+    opacity:0.4;
+}
+body::after{
+    content:"";
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:repeating-linear-gradient(
+        transparent, transparent 2px,
+        rgba(0,255,0,0.03) 3px
+    );
+    pointer-events:none;
+    z-index:1;
+}
+.content{
+    position:relative;
+    z-index:2;
 }
 .one{ color:red; }
 #matrixBtn{
@@ -23,14 +47,14 @@ body{
     font-size:20px;
     cursor:pointer;
     box-shadow:0 0 10px #0f0, 0 0 20px #0f0;
-    transition: box-shadow .3s;
+    transition: box-shadow.3s;
     margin-bottom:20px;
 }
 #matrixBtn:hover{
     box-shadow:0 0 20px #0f0, 0 0 40px #0f0;
 }
 #matrixContainer{
-    background:#000;
+    background:rgba(0,0,0,0.85);
     color:#0f0;
     font-family:monospace;
     white-space:pre-wrap;
@@ -44,6 +68,7 @@ body{
     border:1px solid #0f0;
     margin:auto;
     text-align:left;
+    box-shadow:0 0 30px rgba(0,255,0,0.3);
 }
 .choiceBtn{
     background:black;
@@ -66,11 +91,49 @@ body{
 </style>
 </head>
 <body>
+<canvas id="matrixBg"></canvas>
+<div class="content">
 <p>WANNA GET <span class="one">HACKED</span>?<br>TRY CLICKING THE BELOW BUTTON</p>
 <button id="matrixBtn">Run Matrix Protocol</button>
 <div id="matrixContainer"></div>
+</div>
 
 <script>
+const canvas = document.getElementById("matrixBg");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+const fontSize = 16;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array(columns).fill(1);
+
+function drawMatrix(){
+    ctx.fillStyle = "rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#0f0";
+    ctx.font = fontSize + "px monospace";
+
+    for(let i=0; i<drops.length; i++){
+        const text = chars[Math.floor(Math.random()*chars.length)];
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975){
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 33);
+
+window.addEventListener("resize", ()=>{
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+});
+
 const container = document.getElementById("matrixContainer");
 const btn = document.getElementById("matrixBtn");
 const CHARS = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*";
@@ -91,7 +154,7 @@ async function typing(text, delay=30, col="#0f0"){
     line.style.whiteSpace = "pre-wrap";
     container.appendChild(line);
     for(let char of text){
-        line.textContent += char; // safer than innerHTML
+        line.textContent += char;
         scrollDown();
         await sleep(delay);
     }
@@ -105,7 +168,7 @@ async function matrixRain(lines=60, speed=30){
         for(let j=0; j<width; j++){
             line += CHARS[Math.floor(Math.random()*CHARS.length)];
         }
-        container.innerHTML += color(line, Math.random()>.5 ? "#0f0" : "#0a0") + "<br>";
+        container.innerHTML += color(line, Math.random()>.5? "#0f0" : "#0a0") + "<br>";
         scrollDown();
         await sleep(speed);
     }
@@ -133,13 +196,13 @@ async function runMatrix(){
     container.style.display = "block";
     container.innerHTML = "";
 
-    await typing("MATRIX PROTOCOL", 50, "#0f0");
+    await typing("MATRIX PROTOCOL INITIATED...", 40, "#0f0");
     await sleep(500);
-    await matrixRain(60, 30);
-    await progressBar("Connecting...");
-    await progressBar("Decrypting...");
+    await matrixRain(60, 25);
+    await progressBar("Connecting to target...");
+    await progressBar("Decrypting security layer...");
     await progressBar("Bypassing firewall...");
-    await progressBar("Full system hacked...");
+    await progressBar("Root access gained...");
 
     await typing("SYSTEM COMPROMISED", 40, "red");
     await sleep(1200);
