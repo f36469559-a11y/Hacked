@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>hacked</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, nofollow">
 <style>
 body{
     background:black;
@@ -72,7 +72,9 @@ body::after{
 #matrixContainer{
     background:rgba(0,0,0,0.9); color:#0f0;
     font-family:monospace; white-space:pre-wrap;
-    display:none; padding:15px; height:90vh;
+    display:none;
+    padding:15px 15px 200px 15px;
+    height:100dvh;
     width:95%; max-width:900px; overflow:auto;
     box-sizing:border-box; border:1px solid #0f0;
     margin:auto; text-align:left;
@@ -115,6 +117,8 @@ body::after{
 <audio id="beepSound" preload="auto">
 <source src="data:audio/wav;base64,UklGRlgGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
 </audio>
+<audio id="bgMusic" src="funk_abnormal.mp3" preload="auto" loop></audio>
+<audio id="favSong" src="funk.mp3" preload="auto" loop></audio>
 
 <script>
 const canvas = document.getElementById("matrixBg");
@@ -162,9 +166,12 @@ const container = document.getElementById("matrixContainer");
 const btn = document.getElementById("matrixBtn");
 const typeSound = document.getElementById("typeSound");
 const beepSound = document.getElementById("beepSound");
+const bgMusic = document.getElementById("bgMusic");
+const favSong = document.getElementById("favSong");
+bgMusic.volume = 0.3;
+favSong.volume = 0.5;
+
 const CHARS = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*";
-const bgMusic = new Audio("funk_abnormal.mp3");
-bgMusic.loop = true; bgMusic.volume = 0.3;
 
 function color(text, col){ return `<span style="color:${col}">${text}</span>`; }
 function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
@@ -242,12 +249,18 @@ async function runMatrix(){
     await sleep(800);
     document.body.classList.remove("flash", "glitch");
 
-    container.innerHTML += color("JUST PRANKING 😎<br>AFEEF TRY RATING THIS OUT OF 10", "yellow") + "<br><br>";
     container.innerHTML += `<button id="eidBtn" class="choiceBtn">▶ ACCESS SECRET MESSAGE</button>`;
     scrollDown();
 
     document.getElementById("eidBtn").onclick = async function(){
         this.style.display = "none";
+
+        // Stop hack music, start favourite song
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+        favSong.currentTime = 0;
+        favSong.play().catch(()=>{});
+
         let eidLine = document.createElement("div");
         eidLine.style.color = "#00ff00";
         eidLine.style.fontSize = "45px";
@@ -288,4 +301,3 @@ btn.onclick = runMatrix;
 </script>
 </body>
 </html>
-  
