@@ -271,7 +271,7 @@ async function runMatrix(){
         eidLine.style.animation = "glow 1s infinite alternate";
         container.appendChild(eidLine);
 
-        const eidText = "EID MUBARAK MY DEAR AFEEF HASSIM";
+        const eidText = "EID MUBARAK MY DEAR SIS";
         for(let char of eidText){
             eidLine.innerHTML += char;
             scrollDown();
@@ -279,7 +279,7 @@ async function runMatrix(){
         }
 
         container.innerHTML += "<br><br>";
-        await typing("• Afeef, I failed to protect the trust you gave me, and I deeply regret it 💚", 30, "#00ff00");
+        await typing("• sis, I so sorry for disturbing you, and I deeply regret it 💚", 30, "#00ff00");
 
         container.innerHTML += `<br><button id="okBtn" class="choiceBtn">Trust Restored 💚</button><button id="forgiveBtn" class="choiceBtn">Not Ready Yet 🌙</button>`;
         scrollDown();
@@ -287,7 +287,7 @@ async function runMatrix(){
         document.getElementById("okBtn").onclick = async function(){
             this.style.display = "none";
             document.getElementById("forgiveBtn").style.display = "none";
-            await typing("Thank you, Afeef 💚\nI'll value your trust more carefully from now on 🕊️", 30, "#00ff00");
+            await typing("Thank you, sis 💚\nI'll value your trust more carefully from now on 🕊️", 30, "#00ff00");
         };
 
         document.getElementById("forgiveBtn").onclick = async function(){
